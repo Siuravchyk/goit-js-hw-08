@@ -1,39 +1,63 @@
 import throttle from 'lodash.throttle';
 
-const feedbackForm = document.querySelector('.feedback-form');
-const STORAGE_KEY = 'feedback-form-state';
-let feedbackDataToLs = {};
-const {
-  elements: { email, message },
-} = feedbackForm;
+const LOCALSTORAGE_KEY = "feedback-form-state";
 
-restoreUserInputs();
+const form = document.querySelector('.feedback-form');
+const emailInput = document.querySelector('input');
+const messageInput = document.querySelector('textarea');
 
-feedbackForm.addEventListener('input', throttle(saveFeedbackData, 500));
-feedbackForm.addEventListener('submit', onSubmitForm);
 
-function saveFeedbackData(e) {
-  feedbackDataToLs[e.target.name] = e.target.value;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(feedbackDataToLs));
+const storedData = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY));
+
+    if (storedData) {
+
+        const { email, message } = storedData;
+        emailInput.value = email;
+        messageInput.value = message;
+
+    } else { 
+
+        emailInput.value = "";
+        messageInput.value = "";
+    }
+    
+
+const throttledSaveUserData = throttle(savedUserData, 500);
+
+form.addEventListener("input", savedUserData);
+form.addEventListener("submit", cleanedStorage);
+
+function savedUserData(evt) {
+    evt.preventDefault();
+
+   const { email, message } = evt.currentTarget.elements;
+    
+        const info = {
+            email: email.value,
+            message: message.value
+        }
+        
+    localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(info)); 
 }
 
-function onSubmitForm(e) {
-  if (email.value === '' || message.value === '') {
-    return alert('Заповніть будь ласка усі поля');
-  }
-  e.preventDefault();
-  e.currentTarget.reset();
-  console.log(feedbackDataToLs);
-  feedbackDataToLs = {};
-  localStorage.removeItem(STORAGE_KEY);
-}
+function cleanedStorage(evt) {
+    evt.preventDefault();
 
-function restoreUserInputs() {
-  const savedFeedback = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  if (savedFeedback) {
-    message.value = savedFeedback.message || '';
-    email.value = savedFeedback.email || '';
-    feedbackDataToLs[email.name] = savedFeedback.email || '';
-    feedbackDataToLs[message.name] = savedFeedback.message || '';
-  }
+    const { email, message } = evt.currentTarget.elements;
+    
+      if (email.value === "" || message.value === "") {
+          alert("Please fill in all the fields!");
+          return;
+        
+      }
+    
+    const cleanedData = {
+        email: email.value,
+        message: message.value,
+    }
+
+        localStorage.removeItem(LOCALSTORAGE_KEY);
+        console.log(cleanedData);
+        evt.currentTarget.reset();            
+
 }

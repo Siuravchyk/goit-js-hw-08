@@ -41,7 +41,7 @@ function savedUserData(evt) {
 }
 
 function cleanedStorage(evt) {
-    evt.preventDefault();
+    
 
     const { email, message } = evt.currentTarget.elements;
     
